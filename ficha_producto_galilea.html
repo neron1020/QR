@@ -35,7 +35,7 @@ async function cargarDatos() {
     skipEmptyLines: true,
     complete: function(results) {
         const data = results.data;
-        const producto = data.find(row => row.Llave === llave); // asumo que usas "Llave" para filtrar
+        const producto = data.find(row => row.llave === llave); // asumo que usas "Llave" para filtrar
         if (producto) {
             let html = "";
             for (const campo in producto) {
