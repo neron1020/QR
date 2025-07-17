@@ -31,29 +31,30 @@ async function cargarDatos() {
     const csv = await response.text();
 
     Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            const data = results.data;
-            // Cambié aquí para buscar por 'Llave' (igual mayúscula/minúscula según CSV)
-            const producto = data.find(row => row.Llave === llave || row.llave === llave);
-            if (producto) {
-                let html = "";
-                for (const campo in producto) {
-                    if (campo.toLowerCase() !== "llave" && producto[campo]) {
-                        let valor = producto[campo];
-                        if (campo.toLowerCase().includes("etapa")) {
-                            valor = parseInt(valor); // Mostrar solo número entero en etapas
-                        }
-                        html += `<p><strong>${campo}:</strong> ${valor}</p>`;
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+        const data = results.data;
+        const producto = data.find(row => row.Llave === llave); // asumo que usas "Llave" para filtrar
+        if (producto) {
+            let html = "";
+            for (const campo in producto) {
+                // Excluir las columnas "obra" y "codigo" y campos vacíos
+                if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && producto[campo]) {
+                    let valor = producto[campo];
+                    if (campo === "Última etapa comprada" || campo === "Etapa en ejecución") {
+                        valor = parseInt(valor);
                     }
+                    html += `<p><strong>${campo}:</strong> ${valor}</p>`;
                 }
-                document.getElementById("contenido").innerHTML = html;
-            } else {
-                document.getElementById("contenido").innerText = "Producto no encontrado.";
             }
+            document.getElementById("contenido").innerHTML = html;
+        } else {
+            document.getElementById("contenido").innerText = "Producto no encontrado.";
         }
-    });
+    }
+});
+
 }
 
 cargarDatos();
