@@ -1,64 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Ficha Producto Galilea</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 2em; }
-        .logo { position: absolute; top: 20px; right: 20px; width: 150px; }
-        .card { background: white; padding: 2em; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 700px; margin: auto; }
-        h2 { color: #c8102e; font-size: 32px; }
-        p { font-size: 14px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Ficha Producto Galilea</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      background: #f9f9f9;
+    }
+    .card {
+      background: white;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 700px;
+      margin: auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+    h2 {
+      color: #c8102e;
+      font-size: 32px;
+      margin: 0;
+    }
+    .logo {
+      width: 150px;
+      height: auto;
+    }
+    p {
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-    <img src="https://neron1020.github.io/QR/logo.jpg" alt="Logo" class="logo">
-    <div class="card">
-        <h2>Ficha del Producto</h2>
-        <div id="contenido">Cargando...</div>
+  <div class="card">
+    <div class="header">
+      <h2>Ficha del Producto</h2>
+      <img src="https://neron1020.github.io/QR/logo.jpg" alt="Logo" class="logo">
     </div>
+    <div id="contenido">Cargando...</div>
+  </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script>
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script>
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
 
-async function cargarDatos() {
-    const llave = getQueryParam("llave");  // Cambié aquí de 'codigo' a 'llave'
-    const response = await fetch("stock_critico_master.csv");  // Cambié aquí el nombre del CSV
-    const csv = await response.text();
+    async function cargarDatos() {
+      const llave = getQueryParam("llave");
+      const response = await fetch("https://neron1020.github.io/QR/stock_critico_master.csv");
+      const csv = await response.text();
 
-    Papa.parse(csv, {
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-        const data = results.data;
-        const producto = data.find(row => row.llave === llave); // asumo que usas "Llave" para filtrar
-        if (producto) {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const data = results.data;
+          const producto = data.find(row => row.llave === llave);
+          if (producto) {
             let html = "";
             for (const campo in producto) {
-                // Excluir las columnas "obra" y "codigo" y campos vacíos
-                if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && campo.toLowerCase() !== "llave" && producto[campo]) {
-                    let valor = producto[campo];
-                    if (campo === "Última etapa comprada" || campo === "Etapa en ejecución") {
-                        valor = parseInt(valor);
-                    }
-                    html += `<p><strong>${campo}:</strong> ${valor}</p>`;
-                }
+              if (campo !== "obra" && campo !== "codigo" && producto[campo]) {
+                html += `<p><strong>${campo}:</strong> ${producto[campo]}</p>`;
+              }
             }
             document.getElementById("contenido").innerHTML = html;
-        } else {
+          } else {
             document.getElementById("contenido").innerText = "Producto no encontrado.";
+          }
         }
+      });
     }
-});
 
-}
-
-cargarDatos();
-</script>
+    cargarDatos();
+  </script>
 </body>
 </html>
 
