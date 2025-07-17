@@ -41,6 +41,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      display: block;
     }
     #qr-reader {
       margin-top: 20px;
@@ -48,6 +49,12 @@
       max-width: 400px;
       margin-left: auto;
       margin-right: auto;
+      height: 0;          /* Oculto inicialmente */
+      overflow: hidden;
+      transition: height 0.3s ease;
+    }
+    #qr-reader.active {
+      height: 350px;     /* Altura visible al activarlo */
     }
   </style>
 </head>
@@ -56,13 +63,14 @@
   <div class="card">
     <h2>Ficha del Producto</h2>
     <div id="contenido">Cargando...</div>
-    <button onclick="abrirScanner()">📷 Escanear otro QR</button>
+
+    <!-- Mueve el botón aquí -->
+    <button id="btnEscanear" onclick="abrirScanner()">📷 Escanear otro QR</button>
+
     <div id="qr-reader"></div>
   </div>
 
-  <!-- 📌 PapaParse para leer CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <!-- 📌 html5-qrcode para escaneo QR -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <script>
@@ -104,15 +112,29 @@
 
     cargarDatos();
 
+    let qrReaderInstance = null;
+
     function abrirScanner() {
-      const qrReader = new Html5Qrcode("qr-reader");
-      qrReader.start(
+      const qrReaderDiv = document.getElementById("qr-reader");
+      const btn = document.getElementById("btnEscanear");
+
+      if (qrReaderInstance) {
+        // Si ya está activo, no reiniciar
+        return;
+      }
+
+      qrReaderDiv.classList.add("active");
+
+      qrReaderInstance = new Html5Qrcode("qr-reader");
+      qrReaderInstance.start(
         { facingMode: "environment" },
         {
           fps: 10,
           qrbox: 250
         },
         qrMessage => {
+          qrReaderInstance.stop();
+          qrReaderInstance = null;
           window.location.href = qrMessage;
         },
         errorMessage => {
@@ -120,10 +142,11 @@
         }
       ).catch(err => {
         console.log(`Error al abrir cámara: ${err}`);
+        qrReaderDiv.classList.remove("active");
+        qrReaderInstance = null;
       });
     }
   </script>
 </body>
 </html>
-
 
