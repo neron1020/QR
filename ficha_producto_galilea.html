@@ -40,7 +40,7 @@ async function cargarDatos() {
             let html = "";
             for (const campo in producto) {
                 // Excluir las columnas "obra" y "codigo" y campos vacíos
-                if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && producto[campo]) {
+                if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && campo.toLowerCase() !== "llave" && producto[campo]) {
                     let valor = producto[campo];
                     if (campo === "Última etapa comprada" || campo === "Etapa en ejecución") {
                         valor = parseInt(valor);
