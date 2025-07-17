@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ficha Producto Galilea</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 2em;
-      background: #f9f9f9;
+      position: relative;
+    }
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
     }
     .card {
       background: white;
@@ -15,39 +22,49 @@
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       max-width: 700px;
-      margin: auto;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center; /* ✅ alinea verticalmente */
-      margin-bottom: 1em;
+      margin: 100px auto 50px auto;
+      text-align: left;
     }
     h2 {
       color: #c8102e;
       font-size: 32px;
-      margin: 0;
-    }
-    .logo {
-      width: 120px;   /* ⚙️ ajusta tamaño según tu imagen */
-      height: auto;
-      margin-left: 1em; /* espaciado del título */
     }
     p {
       font-size: 14px;
     }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #c8102e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #qr-reader {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
 </head>
 <body>
+  <img src="logo.jpg" alt="Logo" class="logo" />
   <div class="card">
-    <div class="header">
-      <h2>Ficha del Producto</h2>
-      <img src="https://neron1020.github.io/QR/logo.jpg" alt="Logo" class="logo">
-    </div>
+    <h2>Ficha del Producto</h2>
     <div id="contenido">Cargando...</div>
+    <button onclick="abrirScanner()">📷 Escanear otro QR</button>
+    <div id="qr-reader"></div>
   </div>
 
+  <!-- 📌 PapaParse para leer CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <!-- 📌 html5-qrcode para escaneo QR -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <script>
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -56,7 +73,12 @@
 
     async function cargarDatos() {
       const llave = getQueryParam("llave");
-      const response = await fetch("https://neron1020.github.io/QR/stock_critico_master.csv");
+      if (!llave) {
+        document.getElementById("contenido").innerText = "No se proporcionó llave.";
+        return;
+      }
+
+      const response = await fetch("stock_critico_master.csv");
       const csv = await response.text();
 
       Papa.parse(csv, {
@@ -68,7 +90,7 @@
           if (producto) {
             let html = "";
             for (const campo in producto) {
-              if (campo !== "obra" && campo !== "codigo" && producto[campo]) {
+              if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && producto[campo]) {
                 html += `<p><strong>${campo}:</strong> ${producto[campo]}</p>`;
               }
             }
@@ -81,7 +103,27 @@
     }
 
     cargarDatos();
+
+    function abrirScanner() {
+      const qrReader = new Html5Qrcode("qr-reader");
+      qrReader.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: 250
+        },
+        qrMessage => {
+          window.location.href = qrMessage;
+        },
+        errorMessage => {
+          console.log(`Escaneo error: ${errorMessage}`);
+        }
+      ).catch(err => {
+        console.log(`Error al abrir cámara: ${err}`);
+      });
+    }
   </script>
 </body>
 </html>
+
 
