@@ -98,7 +98,7 @@
           if (producto) {
             let html = "";
             for (const campo in producto) {
-              if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && producto[campo]) {
+              if (campo.toLowerCase() !== "obra" && campo.toLowerCase() !== "codigo" && campo.toLowerCase() !== "llave" && producto[campo]) {
                 html += `<p><strong>${campo}:</strong> ${producto[campo]}</p>`;
               }
             }
